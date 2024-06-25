@@ -8,7 +8,7 @@ const googleSignup = async (req, res) => {
     const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientID}&redirect_uri=${redirectURI}&response_type=code&scope=profile email`;
     
 
-    console.log(url); // Log to ensure the URL is correct
+    // console.log(url); // Log to ensure the URL is correct
     res.redirect(url);
 };
 
