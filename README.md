@@ -1,24 +1,25 @@
-# LOGIN SIGNUP AUTHENTICATION
+# Server configuration
+PORT=1818
 
-|| CREATE A .env file and the following ||
+# MongoDB URI
+MONGO_URI=mongodb://your_mongo_uri
 
-# PORT 1818 
-# MONGO_URI = "
-# JWT_SECRET = 'your secret key'
-# REDIS_HOST = your redis host
-# REDIS_PORT = your redis port
+# JWT Secret for token signing
+JWT_SECRET=your_secret_key
 
-**GOOGLE**
-# CLIENT_ID = your client id
-# CLIENT_SECRET = your client secret
-# REDIRECT_URI = add you redirect uri
+# Redis configuration
+REDIS_HOST=your_redis_host
+REDIS_PORT=your_redis_port
 
+# Google OAuth configuration
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:1818/v1/google/callback
 
-**FACEBOOK**
-
-# FACEBOOK_CLIENT_ID = your facebook client id
-# FACEBOOK_SECRET_KEY = your facebook secret key
-# FACEBOOK_CALLBACK_URL = your facebook callback url
+# Facebook OAuth configuration
+FACEBOOK_CLIENT_ID=your_facebook_client_id
+FACEBOOK_SECRET_KEY=your_facebook_secret_key
+FACEBOOK_CALLBACK_URL=http://localhost:1818/v1/facebook/callback
 
 
 ## FEATURES ##
@@ -27,3 +28,9 @@
 • Authentication :- JWT
 • Signup & login with google facebook and user signup
 • Created a middleware to get user by exchanging token
+
+# FOR GOOGLE
+OPEN BROWSER and GO to This Link it will redirect your to google login/signup page
+localhost:1818/v1/google/signup
+after this this will go to callbackurl which you have to define in your Google OAuth url and your redirect uri
+Then after success this will navigate to /test route which say login succesfully

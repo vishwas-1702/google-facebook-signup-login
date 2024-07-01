@@ -2,7 +2,11 @@ require('dotenv').config();
 const axios = require('axios')
 const user = require('../models/user')
 const { promisify } = require('util');
+const { setDataInRedis } = require('../middleware/protectedRoute')
 const {redis} = require('../db/db')
+const jwt = require("jsonwebtoken")
+const mongoose = require("mongoose");
+
 
 const googleSignup = async (req, res) => {
     const clientID = process.env.CLIENT_ID
@@ -18,6 +22,7 @@ const googleSignup = async (req, res) => {
 // Callback URL 
 const googleAuthCallback = async (req, res) => {
     try {
+        let User 
         const { code } = req.query;
         if (!code) throw new Error('Authorization code not found');
 
@@ -38,32 +43,67 @@ const googleAuthCallback = async (req, res) => {
         // console.log('User Data:', profileResponse.data);
         const userData = profileResponse.data
         const existingUser = await user.findOne({ Email: userData.email });
-        
+        const incrUseCount = await redis.send_command('JSON.NUMINCRBY', ['counters', 'users', 1])
+        const userKey = `usr:${incrUseCount}`
         if (!existingUser) {
-            await user.create({
+            User = await user.create({
                 Name: userData.name,
                 Email: userData.email,
-                isProvider: 'google'
+                isProvider: 'google',
+                userId:userKey
             });
             const data = {name:userData.name,email:userData.email,isProvider:"google"}
-            console.log(data)
-            const incrUseCount = await redis.send_command('JSON.NUMINCRBY', ['counters', 'users', 1])
-            // console.log(incrUseCount)
-            const Key = `usr:${incrUseCount}`
-            await setDataInRedis(Key,data)
+            // console.log(data)
+            await setDataInRedis(userKey,data)
         }
 
+        const tokenPayload = {
+            user: {
+                userId: User.userId,
+                email: userData.email
+            }
+        };
 
-        res.redirect('/test');
+        const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
+
+        res.status(200).json({
+            success: true,
+            token,
+            user: {
+                name: userData.name,
+                email: userData.email,
+            }
+        });
 
     } catch (error) {
-        console.error( error);
+        console.error(error.message);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server error!"
+        });
     }
 };
 
 
 
 
+const getUser = async(req,res)=>{
+    try {
+        let {userId}=req
+        console.log(userId)
+        const getUser = await user.findOne({userId}).select("-Password")
+        if(!getUser) return res.status(404).json({message:"User not found"})
+    res.status(200).json(getUser)
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server error!"
+        });
+    }
+}
 
-module.exports = {googleSignup,googleAuthCallback}
+
+
+module.exports = {googleSignup,googleAuthCallback,getUser}
 

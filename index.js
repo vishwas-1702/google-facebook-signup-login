@@ -6,6 +6,11 @@ const facebookRoute = require('./facebook/fbRoute')
 const signupRoute = require('./signup/signupRoute')
 const {connectToMongo} = require('./db/db')
 
+
+
+
+var logger2 = require('morgan');
+app.use(logger2('dev'));
 // app.use('/signup',googleRoute)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
